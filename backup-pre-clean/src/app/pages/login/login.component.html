@@ -1,46 +1,56 @@
-<div
-  class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-brand-900 to-brand-700"
->
-  <div
-    class="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8"
-  >
+<div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-brand-900 to-brand-700">
+  <div class="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8">
     <div class="text-center mb-6">
       <div class="text-3xl font-bold text-brand-800">Deen Tracker</div>
-      <p class="text-brand-700 mt-1">Build consistent worship—beautifully.</p>
-    </div>
-
-    <div class="space-y-3" *ngIf="!sent()">
-      <label class="block text-sm font-medium text-brand-900">Email</label>
-      <input
-        class="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-brand-400 text-brand-900"
-        type="email"
-        placeholder="you@example.com"
-        [ngModel]="email()"
-        (ngModelChange)="email.set($event)"
-      />
-
-      <button
-        (click)="onEmail()"
-        [disabled]="loading()"
-        class="w-full rounded-xl py-3 font-semibold bg-brand-600 hover:bg-brand-700 text-white"
-      >
-        {{ loading() ? "Sending magic link…" : "Continue with Email" }}
-      </button>
-      <div class="text-center text-sm text-gray-500">or</div>
-      <button
-        (click)="onGoogle()"
-        [disabled]="loading()"
-        class="w-full rounded-xl py-3 font-semibold border border-gray-300 hover:bg-gray-50 text-brand-900"
-      >
-        Continue with Google
-      </button>
-    </div>
-
-    <div *ngIf="sent()" class="text-center space-y-2 text-brand-900">
-      <div class="text-xl font-semibold text-brand-800">Check your inbox</div>
-      <p class="text-brand-700">
-        We sent you a sign-in link. Open it on this device.
+      <p class="text-brand-700 mt-1">
+        {{ mode() === 'login' ? 'Welcome back' : 'Create your account' }}
       </p>
+    </div>
+
+    <!-- Form -->
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-brand-900">Email</label>
+        <input
+          class="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-brand-400 text-brand-900"
+          type="email"
+          placeholder="you@example.com"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-brand-900">Password</label>
+        <input
+          class="w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-brand-400 text-brand-900"
+          type="password"
+          placeholder="••••••••"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+        />
+        <div class="text-xs text-brand-700 mt-1" *ngIf="mode()==='signup'">Minimum 6 characters.</div>
+      </div>
+
+      <button
+        (click)="submit()"
+        [disabled]="loading()"
+        class="w-full rounded-xl py-3 font-semibold bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-60"
+      >
+        {{ loading() ? (mode()==='login' ? 'Signing in…' : 'Creating…')
+                      : (mode()==='login' ? 'Sign in' : 'Sign up') }}
+      </button>
+
+      <div class="flex items-center justify-between text-sm text-brand-900">
+        <button class="underline" (click)="switchMode()">
+          {{ mode()==='login' ? 'Create an account' : 'Have an account? Sign in' }}
+        </button>
+        <!-- Optional: add a reset route later -->
+        <!-- <a class="underline" routerLink="/reset">Forgot password?</a> -->
+      </div>
+
+      <div *ngIf="err()" class="text-sm text-red-600">{{ err() }}</div>
+      <div *ngIf="msg()" class="text-sm text-green-700">{{ msg() }}</div>
     </div>
   </div>
 </div>
