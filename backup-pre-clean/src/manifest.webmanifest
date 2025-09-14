@@ -1,0 +1,10 @@
+
+{
+  "name": "Deen Tracker",
+  "short_name": "Deen",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a2459",
+  "theme_color": "#377fff",
+  "icons": []
+}

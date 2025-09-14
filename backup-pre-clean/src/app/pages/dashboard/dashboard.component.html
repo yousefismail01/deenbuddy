@@ -1,0 +1,525 @@
+<!-- src/app/pages/dashboard/dashboard.component.html -->
+
+<!-- Loading state -->
+<div *ngIf="loading" class="p-6 text-center opacity-80">
+  Loading your month…
+</div>
+
+<div
+  class="min-h-screen bg-gradient-to-b from-brand-900 to-brand-800 text-white"
+  [class.pointer-events-none]="loading"
+  [class.opacity-50]="loading"
+>
+  <!-- Top bar -->
+  <div
+    class="max-w-5xl mx-auto px-4 pt-6 pb-3 flex items-center justify-between"
+  >
+    <div>
+      <div class="text-2xl font-bold">Deen Tracker</div>
+      <div class="text-sm opacity-80">
+        Month: {{ deen.round()?.month }}/{{ deen.round()?.year }}
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a
+        routerLink="/info"
+        class="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2"
+        >Info</a
+      >
+
+      <button
+        class="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2"
+        (click)="exportCSV()"
+      >
+        Export CSV
+      </button>
+      <button
+        class="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2"
+        (click)="exportJSON()"
+      >
+        Export JSON
+      </button>
+      <button
+        class="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2"
+        (click)="signOut()"
+      >
+        Sign out
+      </button>
+    </div>
+  </div>
+
+  <!-- Totals -->
+  <div class="rounded-2xl bg-white/10 p-5 mb-5">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div>
+        <div class="text-lg opacity-80">Grand Total</div>
+        <div class="text-4xl font-extrabold">
+          {{ deen.grandTotalWithBonuses() | number : "1.0-0" }}
+        </div>
+        <div class="text-xs opacity-80">
+          Includes weekly bonuses: +{{ deen.weeklyBonus() | number }}
+        </div>
+      </div>
+
+      <div class="flex gap-6">
+        <div>
+          <div class="text-sm opacity-80">Obligation</div>
+          <div class="text-2xl font-bold">
+            {{ deen.obligationTotal() | number : "1.0-0" }}
+          </div>
+        </div>
+        <div>
+          <div class="text-sm opacity-80">Growth</div>
+          <div class="text-2xl font-bold">
+            {{ deen.growthTotal() | number : "1.0-0" }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Simple gauge pill showing today's gauge -->
+      <div class="min-w-[260px]">
+        <div class="text-sm opacity-80 mb-1">Today’s gauge</div>
+        <div class="w-full h-3 rounded-full bg-white/20 overflow-hidden">
+          <div
+            class="h-3 rounded-full"
+            [ngClass]="{
+              'bg-green-400': deen.dayBreakdown(todayDay).gauge >= 100,
+              'bg-yellow-300':
+                deen.dayBreakdown(todayDay).gauge >= 60 &&
+                deen.dayBreakdown(todayDay).gauge < 100,
+              'bg-gray-300': deen.dayBreakdown(todayDay).gauge < 60
+            }"
+            [style.width.%]="deen.dayBreakdown(todayDay).gauge"
+          ></div>
+        </div>
+        <div class="text-xs opacity-80 mt-1">
+          {{ deen.dayBreakdown(todayDay).gauge }} / 100
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded Day Panel (appears above the grid and pushes everything down) -->
+  <div *ngIf="expandedDay() as n" class="max-w-5xl mx-auto px-4">
+    <div class="rounded-2xl bg-white text-brand-900 p-5 mb-5 shadow-xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-xl font-bold">
+            Day {{ n }} ({{ weekday(n) }}) — Detailed View
+          </div>
+          <div class="text-sm text-gray-600">
+            Adjust counts and toggles below.
+          </div>
+        </div>
+        <button
+          class="px-3 py-1 rounded-lg border hover:bg-gray-50"
+          (click)="closeExpanded()"
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <!-- Fardh 0..5 -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Fardh (0–5)</div>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-mini"
+              (click)="incFardh(n, -1)"
+              [disabled]="isFuture(n)"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="0"
+              max="5"
+              class="w-20 rounded-lg border px-3 py-2"
+              [disabled]="isFuture(n)"
+              [value]="deen.days()[n]?.salah?.f ?? 0"
+              (input)="setFardh(n, +$any($event.target).value)"
+            />
+            <button
+              class="btn-mini"
+              (click)="incFardh(n, 1)"
+              [disabled]="isFuture(n)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- N 0..12 -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Nawafil (0–12)</div>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-mini"
+              (click)="incNafl(n, -1)"
+              [disabled]="isFuture(n)"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="0"
+              max="12"
+              class="w-20 rounded-lg border px-3 py-2"
+              [disabled]="isFuture(n)"
+              [value]="deen.days()[n]?.salah?.n ?? 0"
+              (input)="setNafl(n, +$any($event.target).value)"
+            />
+            <button
+              class="btn-mini"
+              (click)="incNafl(n, 1)"
+              [disabled]="isFuture(n)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- Duha (0/2) -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Duha (0/2)</div>
+          <div class="inline-flex gap-2">
+            <button
+              class="pill"
+              [ngClass]="
+                (deen.days()[n]?.salah?.d ? 'pill-yes' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              aria-pressed="{{ deen.days()[n]?.salah?.d ? 'true' : 'false' }}"
+              (click)="setBool(n, ['salah', 'd'], true)"
+            >
+              Yes
+            </button>
+
+            <button
+              class="pill"
+              [ngClass]="
+                (!deen.days()[n]?.salah?.d ? 'pill-no' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              aria-pressed="{{ !deen.days()[n]?.salah?.d ? 'true' : 'false' }}"
+              (click)="setBool(n, ['salah', 'd'], false)"
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <!-- Witr (0/1) -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Witr (0/1)</div>
+          <div class="inline-flex gap-2">
+            <button
+              class="pill"
+              [ngClass]="
+                (deen.days()[n]?.salah?.w ? 'pill-yes' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="setBool(n, ['salah', 'w'], true)"
+            >
+              Yes
+            </button>
+            <button
+              class="pill"
+              [ngClass]="
+                (!deen.days()[n]?.salah?.w ? 'pill-no' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="setBool(n, ['salah', 'w'], false)"
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <!-- Qiyam (0/2) -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Qiyam (0/2)</div>
+          <div class="inline-flex gap-2">
+            <button
+              class="pill"
+              [ngClass]="
+                (deen.days()[n]?.salah?.q ? 'pill-yes' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="setBool(n, ['salah', 'q'], true)"
+            >
+              Yes
+            </button>
+            <button
+              class="pill"
+              [ngClass]="
+                (!deen.days()[n]?.salah?.q ? 'pill-no' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="setBool(n, ['salah', 'q'], false)"
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <!-- Qurʾān pages -->
+        <div class="rounded-xl border p-4">
+          <div class="font-semibold mb-2">Qurʾān (pages)</div>
+          <div class="text-xs text-gray-500 mb-2">
+            Daily target: 4 pages (1 point per page)
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-mini"
+              (click)="incQuran(n, -1)"
+              [disabled]="isFuture(n)"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="0"
+              class="w-24 rounded-lg border px-3 py-2"
+              [disabled]="isFuture(n)"
+              [value]="deen.days()[n]?.quran?.pages ?? 0"
+              (input)="setQuran(n, +$any($event.target).value)"
+            />
+            <button
+              class="btn-mini"
+              (click)="incQuran(n, 1)"
+              [disabled]="isFuture(n)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- Fasting (adaptive label) -->
+        <div class="md:col-span-2 rounded-xl border p-4">
+          <div class="font-semibold mb-2">{{ fastingLabel(n) }}</div>
+          <div class="inline-flex gap-2">
+            <button
+              class="pill"
+              [ngClass]="
+                (fastingOn(n) ? 'pill-yes' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="toggleFasting(n)"
+            >
+              Yes
+            </button>
+            <button
+              class="pill"
+              [ngClass]="
+                (!fastingOn(n) ? 'pill-no' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="toggleFasting(n)"
+            >
+              No
+            </button>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">
+            <span *ngIf="isWhiteDay(n)">Applies on the 13th–15th.</span>
+            <span *ngIf="!isWhiteDay(n) && (isMonday(n) || isThursday(n))"
+              >Applies on Mondays & Thursdays.</span
+            >
+            <span *ngIf="!isWhiteDay(n) && !(isMonday(n) || isThursday(n))"
+              >Optional on other days.</span
+            >
+          </div>
+        </div>
+
+        <!-- Sadaqah -->
+        <div class="md:col-span-2 rounded-xl border p-4">
+          <div class="font-semibold mb-2">Sadaqah</div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="pill"
+              [ngClass]="
+                (deen.days()[n]?.sadaqah?.money ? 'pill-yes' : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="toggleSadaqah(n, 'money')"
+            >
+              Money
+            </button>
+            <button
+              class="pill"
+              [ngClass]="
+                (deen.days()[n]?.sadaqah?.kindness
+                  ? 'pill-yes'
+                  : 'pill-muted') +
+                ' ' +
+                (isFuture(n) ? 'pill-disabled' : '')
+              "
+              [disabled]="isFuture(n)"
+              (click)="toggleSadaqah(n, 'kindness')"
+            >
+              Kindness
+            </button>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">
+            Green = selected, grey = off.
+          </div>
+        </div>
+
+        <!-- Dhikr counters -->
+        <!-- Inside the expanded panel -->
+        <div class="md:col-span-2 rounded-xl border p-4">
+          <div class="font-semibold mb-3">Dhikr (0–100 each)</div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div *ngFor="let key of dhikrKeys">
+              <label class="block text-sm font-medium mb-1 capitalize">{{
+                key
+              }}</label>
+              <div class="flex items-center gap-2">
+                <button
+                  class="btn-mini"
+                  (click)="adjustDhikr(n, key, -1)"
+                  [disabled]="isFuture(n)"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="w-20 rounded-lg border px-3 py-2"
+                  [disabled]="isFuture(n)"
+                  [value]="deen.days()[n]?.dhikr?.[key] ?? 0"
+                  (input)="setDhikr(n, key, +$any($event.target).value)"
+                />
+                <button
+                  class="btn-mini"
+                  (click)="adjustDhikr(n, key, 1)"
+                  [disabled]="isFuture(n)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month grid -->
+  <div class="max-w-5xl mx-auto px-4">
+    <div
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pb-20"
+    >
+      <div
+        *ngFor="let n of daysArr()"
+        class="rounded-2xl p-3 cursor-pointer transition"
+        [ngClass]="{
+          'bg-white text-brand-900 hover:shadow-md': !isFuture(n),
+          'bg-white/10 text-white/60 cursor-not-allowed': isFuture(n)
+        }"
+        (click)="!isFuture(n) && openDay(n)"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm font-semibold">
+            Day {{ n }} ({{ weekday(n) }})
+          </div>
+          <span
+            *ngIf="isFuture(n)"
+            class="text-xs rounded-full px-2 py-0.5 bg-white/10 text-white/70"
+            >Locked</span
+          >
+        </div>
+
+        <!-- Quick glance summary -->
+        <!-- Quick glance summary -->
+        <div class="text-xs opacity-80 space-y-1">
+          <div>
+            F: {{ deen.days()[n]?.salah?.f ?? 0 }} • N:
+            {{ deen.days()[n]?.salah?.n ?? 0 }} • Qurʾān:
+            {{ deen.days()[n]?.quran?.pages ?? 0 }}p
+          </div>
+
+          <div>
+            D: {{ deen.days()[n]?.salah?.d ? "Y" : "N" }} • W:
+            {{ deen.days()[n]?.salah?.w ? "Y" : "N" }} • Q:
+            {{ deen.days()[n]?.salah?.q ? "Y" : "N" }}
+          </div>
+
+          <div>
+            Fast:
+            <span
+              class="inline-block px-2 py-0.5 rounded-full"
+              [ngClass]="
+                fastingOn(n)
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white/10 text-current'
+              "
+            >
+              {{ fastingOn(n) ? "Yes" : "No" }} — {{ fastingLabel(n) }}
+            </span>
+          </div>
+
+          <!-- NEW: Sadaqah -->
+          <div>
+            Sadaqah:
+            <span
+              [ngClass]="
+                deen.days()[n]?.sadaqah?.money ? 'text-green-300' : 'opacity-70'
+              "
+              >Money</span
+            >
+            •
+            <span
+              [ngClass]="
+                deen.days()[n]?.sadaqah?.kindness
+                  ? 'text-green-300'
+                  : 'opacity-70'
+              "
+              >Kindness</span
+            >
+          </div>
+
+          <!-- NEW: Dhikr total vs target -->
+          <div>
+            Dhikr: {{ dhikrSum(n) }}/{{ dhikrTargetTotal() }}
+            <span
+              class="inline-block px-2 py-0.5 rounded-full ml-1"
+              [ngClass]="{
+                'bg-green-400 text-brand-900':
+                  dhikrSum(n) >= dhikrTargetTotal(),
+                'bg-yellow-300 text-brand-900':
+                  dhikrSum(n) >= dhikrTargetTotal() * 0.6 &&
+                  dhikrSum(n) < dhikrTargetTotal(),
+                'bg-white/20 text-white': dhikrSum(n) < dhikrTargetTotal() * 0.6
+              }"
+            >
+              {{ (100 * dhikrSum(n)) / dhikrTargetTotal() | number : "1.0-0" }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

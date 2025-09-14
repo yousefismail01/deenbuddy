@@ -1,0 +1,110 @@
+<div class="min-h-screen bg-gradient-to-b from-brand-900 to-brand-800 text-white">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold">How scoring works</h1>
+      <a routerLink="/" class="rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2">Back</a>
+    </div>
+
+    <!-- Overview -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h2 class="text-xl font-semibold mb-2">Overview</h2>
+      <p class="opacity-90">
+        Your daily points are split into <span class="font-semibold">Obligation</span> and <span class="font-semibold">Growth</span>. 
+        The app also computes a <span class="font-semibold">Daily Gauge</span> (0–150) that compares your day to sensible targets, and adds
+        <span class="font-semibold">Weekly Bonuses</span> for consistency.
+      </p>
+    </div>
+
+    <!-- Obligation vs Growth -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Obligation vs Growth</h3>
+      <ul class="list-disc ml-6 space-y-1 opacity-90">
+        <li><span class="font-semibold">Obligation:</span> Fardh prayers (0–5). Witr can be counted as obligation (on by default).</li>
+        <li><span class="font-semibold">Growth:</span> Nafl count, Duha, Qiyam, Qurʾān pages, Dhikr counts, Fasting, Sadaqah.</li>
+        <li>The top card shows <span class="font-semibold">Obligation</span>, <span class="font-semibold">Growth</span>, and the overall <span class="font-semibold">Grand Total</span>.</li>
+      </ul>
+    </div>
+
+    <!-- Daily gauge -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Daily Gauge (0–150)</h3>
+      <p class="opacity-90 mb-2">
+        The gauge normalizes your day against friendly targets. 100 ≈ targets met. Above 100 means you went beyond.
+      </p>
+      <div class="grid sm:grid-cols-2 gap-4 text-sm opacity-90">
+        <div>
+          <div class="font-semibold mb-1">Targets used for the gauge</div>
+          <ul class="list-disc ml-5 space-y-1">
+            <li>Fardh: 5</li>
+            <li>Nafl: 12</li>
+            <li>Duha: done</li>
+            <li>Qiyam: done</li>
+            <li>Qurʾān: <span class="font-semibold">4 pages</span> (no hard cap; just a target)</li>
+            <li>Dhikr: 100 per item (Astaghfirullah, Ṣalawāt, etc.)</li>
+            <li>Fasting: depends on day (see below)</li>
+            <li>Sadaqah: money + kindness</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-semibold mb-1">Colors</div>
+          <ul class="list-disc ml-5 space-y-1">
+            <li>Green ≥ 100: met/exceeded targets</li>
+            <li>Yellow 60–99: solid progress</li>
+            <li>Grey &lt; 60: room to grow</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fasting logic -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Fasting (context-aware)</h3>
+      <p class="opacity-90 mb-2">The label and points depend on the day:</p>
+      <ul class="list-disc ml-6 space-y-1 opacity-90">
+        <li><span class="font-semibold">White Days (13–15):</span> “White Days fasting” — higher weight.</li>
+        <li><span class="font-semibold">Mondays/Thursdays:</span> “Sunnah fasting” — medium weight.</li>
+        <li><span class="font-semibold">Other days:</span> “Optional fasting” — light weight.</li>
+      </ul>
+      <p class="text-xs opacity-70 mt-2">All future days are locked. Past rules apply to the day’s type in your current month.</p>
+    </div>
+
+    <!-- Qur'an & Dhikr -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Qurʾān & Dhikr</h3>
+      <ul class="list-disc ml-6 space-y-1 opacity-90">
+        <li><span class="font-semibold">Qurʾān:</span> 1 point per page. No max. The gauge uses 4 pages as the daily target.</li>
+        <li><span class="font-semibold">Dhikr:</span> Each item is a counter (0–100). Each rep adds a small value (default 0.1).
+          Past 100, points grow gently via diminishing returns (still rewarded, less linear).</li>
+      </ul>
+    </div>
+
+    <!-- Diminishing returns -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Diminishing returns (gentle)</h3>
+      <p class="opacity-90">
+        Extra effort beyond targets still earns points, but with a softer slope. This keeps the score balanced
+        so one area (e.g., very high dhikr) doesn’t drown out others.
+      </p>
+    </div>
+
+    <!-- Weekly bonuses -->
+    <div class="rounded-2xl bg-white/10 p-5 mb-5">
+      <h3 class="text-lg font-semibold mb-2">Weekly bonuses</h3>
+      <ul class="list-disc ml-6 space-y-1 opacity-90">
+        <li><span class="font-semibold">+10</span> for ≥ 5 days in a week with gauge ≥ 60.</li>
+        <li><span class="font-semibold">+10</span> if all 7 days in the week had Fardh = 5.</li>
+      </ul>
+      <p class="text-xs opacity-70 mt-2">Weeks are grouped Sun–Sat by default.</p>
+    </div>
+
+    <!-- Transparency -->
+    <div class="rounded-2xl bg-white/10 p-5">
+      <h3 class="text-lg font-semibold mb-2">Transparency & notes</h3>
+      <ul class="list-disc ml-6 space-y-1 opacity-90">
+        <li>Numbers are a <span class="font-semibold">nudge</span>, not a judgement. Sincerity ≫ totals.</li>
+        <li>You can adjust weights later to suit your goals.</li>
+        <li>Future days are disabled; (optionally) you can lock previous days after the next Fajr.</li>
+      </ul>
+    </div>
+  </div>
+</div>

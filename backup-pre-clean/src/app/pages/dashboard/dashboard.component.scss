@@ -1,0 +1,27 @@
+.chip {
+  @apply text-xs px-3 py-1 rounded-full border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.chip-on {
+  @apply bg-brand-600 text-white border-transparent;
+}
+.btn-mini {
+  @apply w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.pill {
+  @apply px-3 py-1 rounded-full border transition select-none;
+}
+.pill-muted {
+  @apply bg-white text-brand-900 border-gray-300 hover:bg-gray-100;
+}
+.pill-yes {
+  @apply bg-green-500 text-white border-transparent;
+}
+.pill-no {
+  @apply bg-red-500 text-white border-transparent;
+}
+.pill-ghost {
+  @apply bg-white/10 text-white border-white/20 hover:bg-white/20;
+}
+.pill-disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
