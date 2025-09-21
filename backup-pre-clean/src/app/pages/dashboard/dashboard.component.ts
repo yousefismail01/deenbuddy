@@ -1,6 +1,6 @@
 import { Component, computed, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { DeenService } from "../../data/deen.service";
+import { DeenService } from "../../deen/services/deen.service";
 import { AuthService } from "../../core/auth.service";
 import { Dhikr } from "src/app/data/scoring.model";
 import { RouterLink } from "@angular/router";
@@ -30,25 +30,27 @@ export class DashboardComponent implements OnInit {
 
   constructor(public deen: DeenService, private auth: AuthService) {}
 
-  async ngOnInit() {
-    await this.auth.ensureLoaded();
-    const uid = this.auth.userId!;
-    await this.deen.ensureProfile(uid);
-    await this.deen.loadOrCreateCurrentMonth(uid); // <-- monthly mode
+async ngOnInit() {
+  this.loading = true;
+  try {
+    await this.deen.ensureProfile();          // no uid arg
+    await this.deen.loadOrCreateCurrentMonth(); // no uid arg
+  } finally {
     this.loading = false;
   }
+}
 
   // How many days does this month have?
   daysArr = computed(() => {
-    const r: any = this.deen.round();
+    const r: any = this.deen.store.round();
     if (!r) return [];
-    const days = this.deen.daysIn(r.year, r.month);
+    const days = this.deen.store.daysIn(r.year, r.month);
     return Array.from({ length: days }, (_, i) => i + 1);
   });
 
   // Disable future days for the current calendar month
   isFuture(day: number) {
-    const r: any = this.deen.round();
+    const r: any = this.deen.store.round();
     if (!r) return true;
     const isCurrentMonth =
       r.year === this.today.getFullYear() &&
@@ -89,7 +91,7 @@ export class DashboardComponent implements OnInit {
     }));
   }
   incFardh(n: number, delta: number) {
-    const curr = this.deen.days()[n]?.salah?.f ?? 0;
+    const curr = this.deen.store.days()[n]?.salah?.f ?? 0;
     this.setFardh(n, curr + delta);
   }
 
@@ -102,7 +104,7 @@ export class DashboardComponent implements OnInit {
     }));
   }
   incNafl(n: number, delta: number) {
-    const curr = this.deen.days()[n]?.salah?.n ?? 0;
+    const curr = this.deen.store.days()[n]?.salah?.n ?? 0;
     this.setNafl(n, curr + delta);
   }
 
@@ -124,13 +126,13 @@ export class DashboardComponent implements OnInit {
   }
 
   adjustDhikr(day: number, key: keyof Dhikr, delta: number) {
-    const curr = this.deen.days()[day]?.dhikr?.[key] ?? 0;
+    const curr = this.deen.store.days()[day]?.dhikr?.[key] ?? 0;
     this.setDhikr(day, key, (curr as number) + delta);
   }
 
   // Helpers: day→Date, weekday, checks
   dateFor(n: number) {
-    const r: any = this.deen.round();
+    const r: any = this.deen.store.round();
     return new Date(r.year, r.month - 1, n);
   }
   weekday(n: number) {
@@ -155,7 +157,7 @@ export class DashboardComponent implements OnInit {
 
   // Read current toggle for the day
   fastingOn(n: number): boolean {
-    const d = this.deen.days()[n]?.siyam;
+    const d = this.deen.store.days()[n]?.siyam;
     if (!d) return false;
     if (this.isWhiteDay(n)) {
       if (n === 13) return !!d.white13;
@@ -194,7 +196,7 @@ export class DashboardComponent implements OnInit {
   }
 
   incQuran(day: number, delta: number) {
-    const curr = this.deen.days()[day]?.quran?.pages ?? 0;
+    const curr = this.deen.store.days()[day]?.quran?.pages ?? 0;
     this.setQuran(day, curr + delta);
   }
 
@@ -207,7 +209,7 @@ export class DashboardComponent implements OnInit {
   }
 
   dhikrSum(n: number): number {
-    const d = this.deen.days()[n];
+    const d = this.deen.store.days()[n];
     if (!d) return 0;
     const x = d.dhikr;
     return (
@@ -224,7 +226,7 @@ export class DashboardComponent implements OnInit {
     return 600;
   }
   sadaqahAny(n: number): boolean {
-    const s = this.deen.days()[n]?.sadaqah;
+    const s = this.deen.store.days()[n]?.sadaqah;
     return !!(s?.money || s?.kindness);
   }
 

@@ -17,7 +17,7 @@
     <div>
       <div class="text-2xl font-bold">Deen Tracker</div>
       <div class="text-sm opacity-80">
-        Month: {{ deen.round()?.month }}/{{ deen.round()?.year }}
+        Month: {{ deen.store.round()?.month }}/{{ deen.store.round()?.year }}
       </div>
     </div>
     <div class="flex gap-2">
@@ -54,10 +54,10 @@
       <div>
         <div class="text-lg opacity-80">Grand Total</div>
         <div class="text-4xl font-extrabold">
-          {{ deen.grandTotalWithBonuses() | number : "1.0-0" }}
+          {{ deen.store.grandTotalWithBonuses() | number : "1.0-0" }}
         </div>
         <div class="text-xs opacity-80">
-          Includes weekly bonuses: +{{ deen.weeklyBonus() | number }}
+          Includes weekly bonuses: +{{ deen.store.weeklyBonus() | number }}
         </div>
       </div>
 
@@ -65,13 +65,13 @@
         <div>
           <div class="text-sm opacity-80">Obligation</div>
           <div class="text-2xl font-bold">
-            {{ deen.obligationTotal() | number : "1.0-0" }}
+            {{ deen.store.obligationTotal() | number : "1.0-0" }}
           </div>
         </div>
         <div>
           <div class="text-sm opacity-80">Growth</div>
           <div class="text-2xl font-bold">
-            {{ deen.growthTotal() | number : "1.0-0" }}
+            {{ deen.store.growthTotal() | number : "1.0-0" }}
           </div>
         </div>
       </div>
@@ -83,17 +83,17 @@
           <div
             class="h-3 rounded-full"
             [ngClass]="{
-              'bg-green-400': deen.dayBreakdown(todayDay).gauge >= 100,
+              'bg-green-400': deen.store.dayBreakdown(todayDay).gauge >= 100,
               'bg-yellow-300':
-                deen.dayBreakdown(todayDay).gauge >= 60 &&
-                deen.dayBreakdown(todayDay).gauge < 100,
-              'bg-gray-300': deen.dayBreakdown(todayDay).gauge < 60
+                deen.store.dayBreakdown(todayDay).gauge >= 60 &&
+                deen.store.dayBreakdown(todayDay).gauge < 100,
+              'bg-gray-300': deen.store.dayBreakdown(todayDay).gauge < 60
             }"
-            [style.width.%]="deen.dayBreakdown(todayDay).gauge"
+            [style.width.%]="deen.store.dayBreakdown(todayDay).gauge"
           ></div>
         </div>
         <div class="text-xs opacity-80 mt-1">
-          {{ deen.dayBreakdown(todayDay).gauge }} / 100
+          {{ deen.store.dayBreakdown(todayDay).gauge }} / 100
         </div>
       </div>
     </div>
